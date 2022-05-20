@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+
+if [ $# != 2 ]; then
+    echo "Usage: pack_all_a_in_one dir outfile"
+    exit 1
+fi
+
+ar=$AR
+dir=$1
+outfile=$2
+
+if [ "$ar" == "" ]; then
+    echo "did not find ar cmd. please set it to environment variable \"AR\"."
+    echo "for example:"
+    echo "   export AR=ar_path_in_computer"
+    exit 1
+fi
+
+if [ ! -e $ar ]; then
+    echo "ar cmd does not exist! $ar"
+    exit 1
+fi
+
+if [ ! -x $ar ]; then
+    echo "ar cmd is not executable! $ar"
+    exit 1
+fi
+
+if [ ! -e $dir ]; then
+    echo "$dir does not exist!"
+    exit 1
+fi
+
+if [ ! -d $dir ]; then
+    echo "$dir is not dir!"
+    exit 1
+fi
+
+
+if [ ! -e $outfile ]; then
+    touch $outfile || exit 1
+fi
+
+outfile_dir=$(cd `dirname $outfile` && pwd)
+outfile_basename=`basename $outfile`
+outfile=$outfile_dir/$outfile_basename
+
+rm $outfile || exit 1
+
+dir=`cd $dir && pwd` || exit 1
+
+MY_TMPDIR=$(mktemp -d) || exit 1
+trap 'rm -r $MY_TMPDIR' EXIT
+
+cd $MY_TMPDIR || exit 1
+find $dir -type f -name "*.a" -exec $ar -x {} \; || exit 1
+$ar rcs $outfile ./*.o || exit 1
