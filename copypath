@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+#描述：复制文件或者目录的绝对路径到剪切板，比如vim中需要输入绝对路径的时候没有自动补全，就使用这个命令获取一个文件或目录的字符串表示到剪切板，或者想要获取当前目录下一个文件的绝对路径，或者用于去除一个目录中的“..”这样的结构
+if [ $# != 1 ]; then
+	echo "Usage: copypath file_or_dir"
+	exit 1
+fi
+#$1使用双引号是为了处理包含空格的名字
+if [ -d "$1" ]; then
+	RET=$(cd "$1"&&pwd)
+	echo -n \"$RET\" | pbcopy
+elif [ ! -e "$1" ];then
+	echo "\"$1\" does not exist"
+	exit 1
+else
+	DIR=$(cd `dirname "$1"`&&pwd)
+	echo -n \"$DIR/${1##*/}\" | pbcopy
+fi
