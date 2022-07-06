@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+source ~/.bash_profile
+if [ ! "$?" == "0" ]; then
+    echo "source failed!"
+    exit 1
+fi
+#这样在非交互模式下的shell脚本也能使用alias下的命令了
+shopt -s expand_aliases
+if [ ! "$?" == "0" ]; then
+    echo "shopt failed!"
+    exit 1
+fi
+
+ME_DIR=$(cd $(dirname $0) && pwd)
+
+if [ $# != 1 ]; then
+    echo "Usage: trace_exe exe_path "
+    exit 1
+fi
+
+if [ ! -e $1 ]; then
+    echo "${1} not exist!"
+    exit 1
+fi
+
+if [ ! -x $1 ]; then
+    echo "${1} not executalbe!"
+    exit 1
+fi
+
+exe_path=$1
+exe_dir=$(cd $(dirname ${exe_path}) && pwd)
+exe_name=$(basename $exe_path)
+if [ "${exe_name:0:11}" == "mycmds_org_" ]; then
+    echo "can not trace my_cmds_org_*"
+    exit 1
+fi
+
+COPY_PATH="${exe_dir}/mycmds_org_${exe_name}"
+
+if [ ! -e ${COPY_PATH} ]; then
+    cp ${exe_path} ${COPY_PATH} || exit 1
+fi
+cp ${ME_DIR}/data/trace_exe_bridge.sh ${exe_path} || exit 1
+echo "traced"
