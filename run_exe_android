@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+source ~/.bash_profile
+if [ ! "$?" == "0" ]; then
+    echo "source failed!"
+    exit 1
+fi
+#这样在非交互模式下的shell脚本也能使用alias下的命令了
+shopt -s expand_aliases
+if [ ! "$?" == "0" ]; then
+    echo "shopt failed!"
+    exit 1
+fi
+
+ME_DIR=$(cd `dirname $0`&&pwd)
+
+if [ $# != 1 ]; then
+    echo "please give the exe path!"
+    exit 1
+fi
+
+full_path=$1
+exe_name=$(basename ${full_path})
+adb push ${full_path} /data/local/tmp/${exe_name} || exit 1
+adb shell chmod 777 /data/local/tmp/${exe_name}  || exit 1
+adb shell /data/local/tmp/${exe_name}  || exit 1
+adb shell rm /data/local/tmp/${exe_name}  || exit 1
