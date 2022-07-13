@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+source ~/.bash_profile
+if [ ! "$?" == "0" ]; then
+    echo "source failed!"
+    exit 1
+fi
+#这样在非交互模式下的shell脚本也能使用alias下的命令了
+shopt -s expand_aliases
+if [ ! "$?" == "0" ]; then
+    echo "shopt failed!"
+    exit 1
+fi
+
+ME_DIR=$(cd $(dirname $0) && pwd)
+
+#######TEMPLATE END#######
+if [ $# != 1 ]; then
+    echo "Usage: untrace_exe exe_path"
+    exit 1
+fi
+
+if [ ! -e $1 ]; then
+    echo "${1} not exist!"
+    exit 1
+fi
+
+if [ ! -x $1 ]; then
+    echo "${1} not executalbe!"
+    exit 1
+fi
+
+exe_path=$1
+exe_dir=$(cd $(dirname ${exe_path}) && pwd)
+exe_name=$(basename $exe_path)
+COPY_PATH="${exe_dir}/mycmds_org_${exe_name}"
+
+if [ ! -e ${COPY_PATH} ]; then
+    echo "${COPY_PATH} not exist!"
+    exit 1
+fi
+if [ ! -x ${COPY_PATH} ]; then
+    echo "${COPY_PATH} not executalbe!"
+    exit 1
+fi
+
+mv ${COPY_PATH} ${exe_path}
+if [ $? != 0 ]; then
+    echo "mv ${COPY_PATH} ${exe_path} failed"
+    exit 1
+fi
+echo "untraced"
