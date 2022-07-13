@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+source ~/.bash_profile
+if [ ! "$?" == "0" ]; then
+    echo "source failed!"
+    exit 1
+fi
+#这样在非交互模式下的shell脚本也能使用alias下的命令了
+shopt -s expand_aliases
+if [ ! "$?" == "0" ]; then
+    echo "shopt failed!"
+    exit 1
+fi
+ME_DIR=$(cd `dirname $0`&&pwd)
+
+#替换有root权限的手机上的so，然后启动app
+if [ $# -lt 3 ]; then
+  echo "Usage replace_so pkg_name main_activity_class new_so_path1 new_so_path2 ..."
+  exit 1
+fi
+
+PKG_NAME=$1
+MAIN_ACTIVITY=$2
+
+NEW_SO_NAMES=""
+for ((i=3; i<=$#; i++)) ; do
+NEW_SO_PATH=${!i}
+NEW_SO_NAMES="${NEW_SO_NAMES} $(basename ${NEW_SO_PATH})"
+adb push $NEW_SO_PATH /data/local/tmp || exit 1
+done
+adb push $ME_DIR/data/use_new_so.sh /data/local/tmp ||exit 1
+adb shell chmod +x /data/local/tmp/use_new_so.sh ||exit 1
+adb shell su root sh /data/local/tmp/use_new_so.sh $PKG_NAME $MAIN_ACTIVITY $NEW_SO_NAMES ||exit 1
+adb shell su root rm /data/local/tmp/use_new_so.sh ||exit 1
+echo "all done"
