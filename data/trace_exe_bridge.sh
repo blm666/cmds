@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
+if [ ! -d ~/data/log ]; then
+	mkdir -p ~/data/log || exit 1
+fi
+
+if [ ! -f ~/data/log/trace_exe.log ]; then
+	touch ~/data/log/trace_exe.log || exit 1
+fi
+
 the_date=$(date "+%Y-%m-%d %H:%M:%S: ")
-echo $the_date $0 $@ >>/Users/liuhongkai/data/log/replace_exe.log
+echo $the_date $0 $@ >> ~/data/log/trace_exe.log
 cur_exe_path=$0
 cur_exe_dir=$(cd $(dirname ${cur_exe_path}) && pwd)
 cur_exe_name=$(basename ${cur_exe_path})
